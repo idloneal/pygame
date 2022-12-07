@@ -13,7 +13,7 @@ class PLayer(pygame.sprite.Sprite):
         self.maximum_health = 1003
         self.health_bar_length = 430
         self.health_ratio = self.maximum_health / self.health_bar_length
-        self.health_change_speed = 1
+        self.health_change_speed = 5
 
     def update(self):
         self.basic_health()
@@ -39,13 +39,12 @@ class PLayer(pygame.sprite.Sprite):
         transition_width = 0
         transition_color = (255, 0, 0)
         bar_rect = 0
-        health_bar_rect = 0
+        health_bar_rect = pygame.Rect(10, 45, self.current_health / self.health_ratio, 25)  # 计算红色血条
 
         if self.current_health < self.target_health:
             self.current_health += self.health_change_speed
             transition_width = abs(int((self.target_health - self.current_health) / self.health_ratio))
             transition_color = (0, 255, 0)
-            health_bar_rect = pygame.Rect(10, 45, self.current_health / self.health_ratio, 25)  # 计算红色血条
             bar_rect = health_bar_rect.right
         if self.current_health > self.target_health:
             self.current_health -= self.health_change_speed
