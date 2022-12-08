@@ -132,7 +132,7 @@ class NyanStar:
 pygame.mixer.init()  # 音乐模块初始化
 sound = pygame.mixer.Sound('Nyan_Cat_loop.wav')
 sound.set_volume(0.2)
-sound.play()
+sound.play(-1)
 
 pygame.init()
 bg_size = (1800, 800)
