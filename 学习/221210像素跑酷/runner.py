@@ -88,7 +88,7 @@ def display_score():
 
 
 def collision_sprite():
-    if pygame.sprite.spritecollide(player.sprite, obstacle_group,False):  # 检查精灵与精灵组是否碰撞 碰撞后是否删除
+    if pygame.sprite.spritecollide(player.sprite, obstacle_group, False):  # 检查精灵与精灵组是否碰撞 碰撞后是否删除
         obstacle_group.empty()
         return False
     else:
