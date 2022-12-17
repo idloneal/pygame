@@ -10,5 +10,5 @@ class NyanStar:
     def add_particles(self):
         star_range = (random.randint(-300, 300), random.randint(-150, 150))
 ```
-##成果展示
+### 成果展示
 ![img.png](img.png)
