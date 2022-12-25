@@ -78,12 +78,12 @@ class Player(pygame.sprite.Sprite):
             dust_particle = self.dust_run_particles[int(self.dust_frame_index)]
 
             if self.facing_right:
-                pos = dust_particle.get_rect(bottomleft= self.rect.bottomleft)
-                self.display_surface.blit(dust_particle,pos)
+                pos = dust_particle.get_rect(bottomleft=self.rect.bottomleft)
+                self.display_surface.blit(dust_particle, pos)
             else:
-                pos = dust_particle.get_rect(bottomright= self.rect.bottomright)
-                flipped_image = pygame.transform.flip(dust_particle,True,False)
-                self.display_surface.blit(flipped_image,pos)
+                pos = dust_particle.get_rect(bottomright=self.rect.bottomright)
+                flipped_image = pygame.transform.flip(dust_particle, True, False)
+                self.display_surface.blit(flipped_image, pos)
 
     def get_input(self):
         keys = pygame.key.get_pressed()

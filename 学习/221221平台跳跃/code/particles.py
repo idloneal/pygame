@@ -1,8 +1,9 @@
 import pygame
 from support import import_folder
 
+
 class ParticlesEffect(pygame.sprite.Sprite):
-    def __init__(self,pos,type):
+    def __init__(self, pos, type):
         super(ParticlesEffect, self).__init__()
         self.frame_index = 0
         self.animation_speed = 0.5
@@ -11,7 +12,7 @@ class ParticlesEffect(pygame.sprite.Sprite):
         if type == 'land':
             self.frames = import_folder('../graphics/character/dust_particles/land')
         self.image = self.frames[self.frame_index]
-        self.rect = self.image.get_rect(midbottom = pos)
+        self.rect = self.image.get_rect(midbottom=pos)
 
     def animation(self):
         self.frame_index += self.animation_speed

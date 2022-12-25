@@ -1,15 +1,5 @@
-level_map = [
-    '                            ',
-    '                            ',
-    ' XX                           ',
-    ' XX    XXX            XX    ',
-    ' XX P                       ',
-    ' XXXX        XX          XX ',
-    ' XXXX       XX              ',
-    ' XX    X  XXXX    XX  XX    ',
-    '       X  XXXX    XX  XXX   ',
-    '    XXXX  XXXXXX  XX  XXXX  ',
-    'XXXXXXXXXXXXXXXXXXXXXXXXXXXX']
-
+vertical_title_number = 11
 tile_size = 64
-bg_size = (1200, len(level_map) * 64)
+
+screen_height = vertical_title_number * tile_size
+screen_weight = 1200

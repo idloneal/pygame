@@ -4,9 +4,9 @@ from settings import *
 from level import Level
 
 pygame.init()
-screen = pygame.display.set_mode(bg_size)
+screen = pygame.display.set_mode((screen_weight, screen_height))
 clock = pygame.time.Clock()
-level = Level(level_map, screen)
+level = Level(screen)
 
 while True:
     for event in pygame.event.get():
@@ -14,7 +14,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-    screen.fill('black')
+    screen.fill('grey')
     level.run()
 
     pygame.display.update()
