@@ -7,7 +7,7 @@ from support import import_folder
 
 
 class Sky:
-    def __init__(self, horizon):
+    def __init__(self, horizon, style='level'):
         self.top = pygame.image.load('../graphics/decoration/sky/sky_top.png')
         self.bottom = pygame.image.load('../graphics/decoration/sky/sky_bottom.png')
         self.middle = pygame.image.load('../graphics/decoration/sky/sky_middle.png')
@@ -18,6 +18,27 @@ class Sky:
         self.bottom = pygame.transform.scale(self.bottom, (screen_weight, tile_size))
         self.middle = pygame.transform.scale(self.middle, (screen_weight, tile_size))
 
+        # style
+        self.style = style
+        if self.style == 'overworld':
+            palms_surf = import_folder('../graphics/overworld/palms')
+            self.palms = []
+
+            for surface in [random.choice(palms_surf) for _ in range(20)]:
+                x = random.randint(0, screen_weight)
+                y = (self.horizon * tile_size) + random.randint(50, 100)
+                rect = surface.get_rect(midbottom=(x, y))
+                self.palms.append((surface, rect))
+
+            clouds_surf = import_folder('../graphics/overworld/clouds')
+            self.clouds = []
+
+            for surface in [random.choice(clouds_surf) for _ in range(8)]:
+                x = random.randint(0, screen_weight)
+                y = random.randint(100, self.horizon * tile_size - 100)
+                rect = surface.get_rect(midbottom=(x, y))
+                self.clouds.append((surface, rect))
+
     def draw(self, surface):
         for row in range(vertical_title_number):
             y = row * tile_size
@@ -27,6 +48,12 @@ class Sky:
                 surface.blit(self.middle, (0, y))
             if row > self.horizon:
                 surface.blit(self.bottom, (0, y))
+
+        if self.style == 'overworld':
+            for palm in self.palms:
+                surface.blit(palm[0], palm[1])
+            for cloud in self.clouds:
+                surface.blit(cloud[0], cloud[1])
 
 
 class Water:

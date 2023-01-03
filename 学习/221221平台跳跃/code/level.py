@@ -5,54 +5,61 @@ from settings import *
 from player import Player
 from particles import ParticlesEffect
 from support import import_csv_layout, import_cut_graphics
-from map_data import level_0
+from map_data import levels
 from enemy import Enemy
 from decoration import *
 
 
 class Level:
     # level setup
-    def __init__(self, surface):
+    def __init__(self, current_level, surface, create_overworld):
+        # general setup
         self.display_surface = surface
         self.world_shift = 0
         self.current_x = 0
 
+        # overworld connection
+        self.create_overworld = create_overworld
+        self.current_level = current_level
+        level_data = levels[current_level]
+        self.new_max_level = level_data['unlock']
+
         # player
-        player_layout = import_csv_layout(level_0['player'])
+        player_layout = import_csv_layout(level_data['player'])
         self.player = pygame.sprite.GroupSingle()
         self.goal = pygame.sprite.GroupSingle()
         self.player_setup(player_layout)
 
         # terrain
-        terrain_layout = import_csv_layout(level_0['terrain'])
+        terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
 
         # grass
-        grass_layout = import_csv_layout(level_0['grass'])
+        grass_layout = import_csv_layout(level_data['grass'])
         self.grass_sprites = self.create_tile_group(grass_layout, 'grass')
 
         # crate
-        crates_layout = import_csv_layout(level_0['crates'])
+        crates_layout = import_csv_layout(level_data['crates'])
         self.crates_sprites = self.create_tile_group(crates_layout, 'crates')
 
         # coins
-        coins_layout = import_csv_layout(level_0['coins'])
+        coins_layout = import_csv_layout(level_data['coins'])
         self.coins_sprites = self.create_tile_group(coins_layout, 'coins')
 
         # foreground plams
-        fg_palm_layout = import_csv_layout(level_0['fg_palms'])
+        fg_palm_layout = import_csv_layout(level_data['fg_palms'])
         self.fg_palm_sprites = self.create_tile_group(fg_palm_layout, 'fg_palms')
 
         # background plams
-        bg_palm_layout = import_csv_layout(level_0['bg_palms'])
+        bg_palm_layout = import_csv_layout(level_data['bg_palms'])
         self.bg_palm_sprites = self.create_tile_group(bg_palm_layout, 'bg_palms')
 
         # enemy
-        enemies_layout = import_csv_layout(level_0['enemies'])
+        enemies_layout = import_csv_layout(level_data['enemies'])
         self.enemies_sprites = self.create_tile_group(enemies_layout, 'enemies')
 
         # collision
-        collision_layout = import_csv_layout(level_0['collision'])
+        collision_layout = import_csv_layout(level_data['collision'])
         self.collision_sprites = self.create_tile_group(collision_layout, 'collision')
 
         # decoration
@@ -71,16 +78,17 @@ class Level:
                 x = col_index * tile_size
                 y = row_index * tile_size
                 if val == '0':
-                    sprite = Player((x, y), self.display_surface, self.create_jump_particles)
-                    self.player.add(sprite)
+                    player_sprite = Player((x, y), self.display_surface, self.create_jump_particles)
+                    self.player.add(player_sprite)
                 if val == '1':
                     hat_surface = pygame.image.load('../graphics/character/hat.png').convert_alpha()
                     goal_sprite = StaticTile(tile_size, hat_surface, x, y)
                     self.goal.add(goal_sprite)
 
-    def create_tile_group(self, layout, type):
-        global sprite
+    @staticmethod
+    def create_tile_group(layout, type):
         sprite_group = pygame.sprite.Group()
+        sprite = None
 
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
@@ -178,14 +186,14 @@ class Level:
                              self.crates_sprites.sprites() + \
                              self.fg_palm_sprites.sprites()
 
-        for sprite in collidable_sprites:
-            if sprite.rect.colliderect(player.rect):
+        for collidable_sprite in collidable_sprites:
+            if collidable_sprite.rect.colliderect(player.rect):
                 if player.direction.x < 0:
-                    player.rect.left = sprite.rect.right
+                    player.rect.left = collidable_sprite.rect.right
                     player.on_left = True
                     self.current_x = player.rect.left
                 elif player.direction.x > 0:
-                    player.rect.right = sprite.rect.left
+                    player.rect.right = collidable_sprite.rect.left
                     player.on_right = True
                     self.current_x = player.rect.right
 
@@ -201,14 +209,14 @@ class Level:
                              self.crates_sprites.sprites() + \
                              self.fg_palm_sprites.sprites()
 
-        for sprite in collidable_sprites:
-            if sprite.rect.colliderect(player.rect):
+        for collidable_sprite in collidable_sprites:
+            if collidable_sprite.rect.colliderect(player.rect):
                 if player.direction.y > player.gravity:
-                    player.rect.bottom = sprite.rect.top
+                    player.rect.bottom = collidable_sprite.rect.top
                     player.direction.y = 0
                     player.on_ground = True
                 elif player.direction.y < 0:
-                    player.rect.top = sprite.rect.bottom
+                    player.rect.top = collidable_sprite.rect.bottom
                     player.direction.y = 0
                     player.on_ceiling = True
 
@@ -216,6 +224,14 @@ class Level:
             player.on_ground = False
         if player.on_ceiling and player.direction.y > 0:
             player.on_ceiling = False
+
+    def check_death(self):
+        if self.player.sprite.rect.top > screen_height:
+            self.create_overworld(self.current_level, 0)
+
+    def check_win(self):
+        if pygame.sprite.spritecollide(self.player.sprite, self.goal, False):
+            self.create_overworld(self.current_level, self.new_max_level)
 
     def run(self):
 
@@ -271,4 +287,6 @@ class Level:
         # water
         self.water.draw(self.display_surface, self.world_shift)
 
+        self.check_death()
+        self.check_win()
         self.scroll_x()
