@@ -1,9 +1,10 @@
 import pygame
 from support import import_folder
+from math import sin
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, surface, create_jump_particles):
+    def __init__(self, pos, surface, create_jump_particles, change_health):
         super(Player, self).__init__()
         self.animations = {}
         self.import_character_assets()
@@ -27,11 +28,18 @@ class Player(pygame.sprite.Sprite):
         self.jump_num = 0
 
         # player status
+        self.status = 'idle'
         self.facing_right = True
         self.on_ground = False
         self.on_ceiling = False
         self.on_left = False
         self.on_right = False
+
+        # health
+        self.change_health = change_health
+        self.invincible = False
+        self.invincible_frame = 800
+        self.hurt_time = 0
 
     def import_character_assets(self):
         character_path = '../graphics/character/'
@@ -40,9 +48,9 @@ class Player(pygame.sprite.Sprite):
             full_path = character_path + animation
             self.animations[animation] = import_folder(full_path)
 
-    def animate(self, status):
-        # 循环图像
-        animation = self.animations[status]
+    def animate(self):
+        # loop frame
+        animation = self.animations[self.status]
         self.frame_index += self.animation_speed
         if self.frame_index >= len(animation):
             self.frame_index = 0
@@ -67,8 +75,8 @@ class Player(pygame.sprite.Sprite):
         elif self.on_ceiling:
             self.rect = self.image.get_rect(midtop=self.rect.midtop)
 
-    def run_dust_animation(self, status):
-        if status == 'run' and self.on_ground:
+    def run_dust_animation(self):
+        if self.status == 'run' and self.on_ground:
             self.dust_frame_index += self.dust_animation_speed
             if self.dust_frame_index >= len(self.dust_run_particles):
                 self.dust_frame_index = 0
@@ -100,18 +108,16 @@ class Player(pygame.sprite.Sprite):
             self.create_jump_particles(self.rect.midbottom)
 
     def get_status(self):
-        status = 'idle'
         if self.direction.x == 0 and self.direction.y == 0:
-            status = 'idle'
+            self.status = 'idle'
         elif self.direction.x != 0 and self.direction.y == self.gravity or self.direction.y == 0:
-            status = 'run'
+            self.status = 'run'
         elif self.direction.y < 0:
-            status = 'jump'
+            self.status = 'jump'
         elif self.direction.y > self.gravity:
-            status = 'fall'
-
-        self.animate(status)
-        self.run_dust_animation(status)
+            self.status = 'fall'
+        else:
+            self.status = 'idle'
 
     def apply_gravity(self):
         self.direction.y += self.gravity
@@ -120,6 +126,37 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         self.direction.y = self.jump_speed
 
+    def get_damage(self):
+        if not self.invincible:
+            self.change_health(-10)
+            self.invincible = True
+            self.hurt_time = pygame.time.get_ticks()
+
+    def invincible_time(self):
+        if self.invincible:
+            current_time = pygame.time.get_ticks()
+            if self.hurt_time + self.invincible_frame <= current_time:
+                self.invincible = False
+
+    def invincible_animate(self):
+        if self.invincible:
+            value = self.wave_value()
+            self.image.set_alpha(value)
+        else:
+            self.image.set_alpha(255)
+
+    @staticmethod
+    def wave_value():
+        value = sin(pygame.time.get_ticks())
+        if value >= 0:
+            return 255
+        else:
+            return 0
+
     def update(self):
         self.get_input()
         self.get_status()
+        self.animate()
+        self.run_dust_animation()
+        self.invincible_time()
+        self.invincible_animate()

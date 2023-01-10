@@ -11,7 +11,7 @@ from decoration import Sky, Water, Cloud
 
 class Level:
     # level setup
-    def __init__(self, current_level, surface, create_overworld, change_coins):
+    def __init__(self, current_level, surface, create_overworld, change_coins, change_health):
         # general setup
         self.display_surface = surface
         self.world_shift = 0
@@ -27,7 +27,7 @@ class Level:
         player_layout = import_csv_layout(level_data['player'])
         self.player = pygame.sprite.GroupSingle()
         self.goal = pygame.sprite.GroupSingle()
-        self.player_setup(player_layout)
+        self.player_setup(player_layout, change_health)
 
         # user interface
         self.change_coins = change_coins
@@ -74,13 +74,16 @@ class Level:
         self.dust_sprite = pygame.sprite.GroupSingle()
         self.player_on_ground = False
 
-    def player_setup(self, layout):
+        # explosion particles
+        self.explosion_sprites = pygame.sprite.Group()
+
+    def player_setup(self, layout, change_health):
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 x = col_index * tile_size
                 y = row_index * tile_size
                 if val == '0':
-                    player_sprite = Player((x, y), self.display_surface, self.create_jump_particles)
+                    player_sprite = Player((x, y), self.display_surface, self.create_jump_particles, change_health)
                     self.player.add(player_sprite)
                 if val == '1':
                     hat_surface = pygame.image.load('../graphics/character/hat.png').convert_alpha()
@@ -227,8 +230,9 @@ class Level:
         if player.on_ceiling and player.direction.y > 0:
             player.on_ceiling = False
 
-    def check_death(self):
+    def check_fall_map(self):
         if self.player.sprite.rect.top > screen_height:
+            self.player.sprite.change_health(-10)
             self.create_overworld(self.current_level, 0)
 
     def check_win(self):
@@ -237,12 +241,28 @@ class Level:
 
     def check_coins_collisions(self):
         collided_coins = pygame.sprite.spritecollide(self.player.sprite, self.coins_sprites, True)
+
         if collided_coins:
             for coin in collided_coins:
                 self.change_coins(coin.value)
 
     def check_enemy_collisions(self):
-        pass
+        enemy_collisions = pygame.sprite.spritecollide(self.player.sprite, self.enemies_sprites, False)
+
+        if enemy_collisions:
+            for enemy in enemy_collisions:
+                enemy_half_half = (enemy.rect.centery + enemy.rect.top) / 2
+                enemy_top = enemy.rect.top
+                player_bottom = self.player.sprite.rect.bottom
+
+                if enemy_top < player_bottom < enemy_half_half and self.player.sprite.status == 'fall':  # 是否踩到了敌人的上半部分
+                    enemy.kill()
+                    explosion_sprite = ParticlesEffect(enemy.rect.center, 'enemy_explosion')
+                    explosion_sprite.rect = explosion_sprite.image.get_rect(center=enemy.rect.center)
+                    self.explosion_sprites.add(explosion_sprite)
+                    self.player.sprite.jump()
+                else:
+                    self.player.sprite.get_damage()
 
     def run(self):
         # decoration sky&cloud
@@ -274,7 +294,12 @@ class Level:
         self.enemies_sprites.update(self.world_shift)
         self.enemy_collision_constraint()
         self.enemies_sprites.draw(self.display_surface)
+        # check enemy collision
         # self.collision_sprites.draw(self.display_surface)
+
+        # explosion particles
+        self.explosion_sprites.update(self.world_shift)
+        self.explosion_sprites.draw(self.display_surface)
 
         # dust particles
         self.dust_sprite.update(self.world_shift)
@@ -297,9 +322,10 @@ class Level:
         # water
         self.water.draw(self.display_surface, self.world_shift)
 
-        # player UI
+        # player collision
         self.check_coins_collisions()
+        self.check_enemy_collisions()
 
-        self.check_death()
+        self.check_fall_map()
         self.check_win()
         self.scroll_x()

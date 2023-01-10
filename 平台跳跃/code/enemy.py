@@ -9,7 +9,7 @@ class Enemy(AnimationTile):
         super(Enemy, self).__init__(size, x, y, '../graphics/enemy/run')
         offset_y = y + size
         self.rect = self.image.get_rect(bottomleft=(x, offset_y))
-        self.speed = float(random.choice(['1', '2']))
+        self.speed = float(random.choice(['-1', '-2']))
 
     def move(self):
         self.reverse_image()

@@ -7,7 +7,7 @@ class UI:
         self.display_surface = surface
 
         # health
-        self.health = pygame.image.load('../graphics/ui/health_bar.png')
+        self.health = pygame.image.load('../graphics/ui/health_bar.png').convert_alpha()
         health_topleft = (20, 10)
         self.health_rect = self.health.get_rect(topleft=health_topleft)
         self.health_bar_topleft = (health_topleft[0] + 34, health_topleft[1] + 29)
@@ -15,7 +15,7 @@ class UI:
         self.health_bar_height = 4
 
         # coins
-        self.coin = pygame.image.load('../graphics/ui/coin.png')
+        self.coin = pygame.image.load('../graphics/ui/coin.png').convert_alpha()
         coin_pos = (self.health_rect.left + 40, self.health_rect.bottom - 10)
         self.coin_rect = self.coin.get_rect(topleft=coin_pos)
 
@@ -27,7 +27,7 @@ class UI:
         current_health_ratio = current / full
         current_bar_width = self.health_bar_max_width * current_health_ratio
         health_bar_rect = pygame.Rect(self.health_bar_topleft, (current_bar_width, self.health_bar_height))
-        pygame.draw.rect(self.display_surface,'#dc4949',health_bar_rect)
+        pygame.draw.rect(self.display_surface, '#dc4949', health_bar_rect)
 
     def show_coins(self, amount):
         self.display_surface.blit(self.coin, self.coin_rect)
