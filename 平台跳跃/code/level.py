@@ -10,12 +10,17 @@ from decoration import Sky, Water, Cloud
 
 
 class Level:
-    # level setup
     def __init__(self, current_level, surface, create_overworld, change_coins, change_health):
         # general setup
         self.display_surface = surface
         self.world_shift = 0
-        self.current_x = 0
+        self.current_x = None
+
+        # audio
+        self.coin_sound = pygame.mixer.Sound('../audio/effects/coin.wav')
+        self.coin_sound.set_volume(0.2)
+        self.stomp_sound = pygame.mixer.Sound('../audio/effects/stomp.wav')
+        self.stomp_sound.set_volume(0.3)
 
         # overworld connection
         self.create_overworld = create_overworld
@@ -186,26 +191,27 @@ class Level:
 
     def horizontal_movement_collision(self):
         player = self.player.sprite
-        player.rect.x += player.direction.x * player.speed
+        player.collision_rect.x += player.direction.x * player.speed
         collidable_sprites = self.terrain_sprites.sprites() + \
                              self.crates_sprites.sprites() + \
                              self.fg_palm_sprites.sprites()
 
         for collidable_sprite in collidable_sprites:
-            if collidable_sprite.rect.colliderect(player.rect):
+            if collidable_sprite.rect.colliderect(player.collision_rect):
                 if player.direction.x < 0:
-                    player.rect.left = collidable_sprite.rect.right
-                    player.on_left = True
+                    player.collision_rect.left = collidable_sprite.rect.right
+                    # player.on_left = True
                     self.current_x = player.rect.left
                 elif player.direction.x > 0:
-                    player.rect.right = collidable_sprite.rect.left
-                    player.on_right = True
+                    player.collision_rect.right = collidable_sprite.rect.left
+                    # player.on_right = True
                     self.current_x = player.rect.right
 
-        if player.on_left and (player.rect.left < self.current_x or player.direction.x > 0):
-            player.on_left = False
-        if player.on_right and (player.rect.right > self.current_x or player.direction.x < 0):
-            player.on_right = False
+        # 左右碰撞时重置矩形
+        # if player.on_left and (player.rect.left < self.current_x or player.direction.x > 0):
+        #     player.on_left = False
+        # if player.on_right and (player.rect.right > self.current_x or player.direction.x < 0):
+        #     player.on_right = False
 
     def vertical_movement_collision(self):
         player = self.player.sprite
@@ -215,20 +221,21 @@ class Level:
                              self.fg_palm_sprites.sprites()
 
         for collidable_sprite in collidable_sprites:
-            if collidable_sprite.rect.colliderect(player.rect):
+            if collidable_sprite.rect.colliderect(player.collision_rect):
                 if player.direction.y >= player.gravity:
-                    player.rect.bottom = collidable_sprite.rect.top
+                    player.collision_rect.bottom = collidable_sprite.rect.top
                     player.direction.y = 0
                     player.on_ground = True
                 elif player.direction.y < 0:
-                    player.rect.top = collidable_sprite.rect.bottom
-                    player.direction.y = 0  # 撞到顶的时候让y为零 就会马上降落
-                    player.on_ceiling = True
+                    player.collision_rect.top = collidable_sprite.rect.bottom
+                    player.direction.y = 1  # 撞到顶的时候让y为零 就会马上降落
+                    # player.on_ceiling = True
 
         if player.on_ground and player.direction.y < 0 or player.direction.y > player.gravity:
             player.on_ground = False
-        if player.on_ceiling and player.direction.y > 0:
-            player.on_ceiling = False
+        # 检测天花板碰撞时重置矩形
+        # if player.on_ceiling and player.direction.y > 0:
+        #     player.on_ceiling = False
 
     def check_fall_map(self):
         if self.player.sprite.rect.top > screen_height:
@@ -243,8 +250,12 @@ class Level:
         collided_coins = pygame.sprite.spritecollide(self.player.sprite, self.coins_sprites, True)
 
         if collided_coins:
+            # 一次碰撞多个硬币就一个声音
+            self.coin_sound.play()
             for coin in collided_coins:
                 self.change_coins(coin.value)
+                # 一次碰撞几个硬币就几个声音
+                # self.coin_sound.play()
 
     def check_enemy_collisions(self):
         enemy_collisions = pygame.sprite.spritecollide(self.player.sprite, self.enemies_sprites, False)
@@ -255,13 +266,28 @@ class Level:
                 enemy_top = enemy.rect.top
                 player_bottom = self.player.sprite.rect.bottom
 
-                if enemy_top < player_bottom < enemy_half_half and self.player.sprite.status == 'fall':  # 是否踩到了敌人的上半部分
+                # jump kill
+                if enemy_top <= player_bottom <= enemy_half_half and self.player.sprite.status == 'fall':  # 是否踩到了敌人的上半部分
                     enemy.kill()
                     explosion_sprite = ParticlesEffect(enemy.rect.center, 'enemy_explosion')
                     explosion_sprite.rect = explosion_sprite.image.get_rect(center=enemy.rect.center)
                     self.explosion_sprites.add(explosion_sprite)
                     self.player.sprite.jump()
-                else:
+                    self.stomp_sound.play()
+
+                # knife kill
+                # elif self.player.sprite.facing_right and self.player.sprite.rect.right - 10 <= enemy.rect.left:
+                #     enemy.kill()
+                #     explosion_sprite = ParticlesEffect(enemy.rect.center, 'enemy_explosion')
+                #     explosion_sprite.rect = explosion_sprite.image.get_rect(center=enemy.rect.center)
+                #     self.explosion_sprites.add(explosion_sprite)
+                # elif not self.player.sprite.facing_right and self.player.sprite.rect.left + 10 >= enemy.rect.right:
+                #     enemy.kill()
+                #     explosion_sprite = ParticlesEffect(enemy.rect.center, 'enemy_explosion')
+                #     explosion_sprite.rect = explosion_sprite.image.get_rect(center=enemy.rect.center)
+                #     self.explosion_sprites.add(explosion_sprite)
+                elif self.player.sprite.facing_right and self.player.sprite.rect.left + 50 >= enemy.rect.left or \
+                        not self.player.sprite.facing_right and self.player.sprite.rect.right - 50 <= enemy.rect.right:
                     self.player.sprite.get_damage()
 
     def run(self):

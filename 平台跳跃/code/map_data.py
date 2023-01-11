@@ -22,7 +22,7 @@ levels = {
     5: level_5,
 }
 for level in range(len(levels)):
-    path_file = '../levels/%d/'%level
+    path_file = '../levels/%d/' % level
     name_file = os.listdir(path_file)
     for temp in name_file:
         name = temp[8:-4]

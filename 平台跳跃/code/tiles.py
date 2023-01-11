@@ -52,8 +52,11 @@ class Coins(AnimationTile):
         self.rect = self.image.get_rect(center=(offset_x, offset_y))
         self.value = value
 
+
 class Plams(AnimationTile):
     def __init__(self, size, x, y, path):
         super(Plams, self).__init__(size, x, y, path)
         offset_y = y + size
         self.rect = self.image.get_rect(bottomleft=(x, offset_y))
+        plams_leaf = (self.rect.width, 58)
+        self.rect = pygame.Rect(self.rect.topleft,plams_leaf)
