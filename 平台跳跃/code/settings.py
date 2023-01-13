@@ -1,5 +1,5 @@
-vertical_title_number = 11
-tile_size = 64
+VERTICAL_TITLE_NUMBER = 11
+TILE_SIZE = 64
 
-screen_height = vertical_title_number * tile_size
-screen_weight = 1200
+SCREEN_HEIGHT = VERTICAL_TITLE_NUMBER * TILE_SIZE
+SCREEN_WIDTH = 1200

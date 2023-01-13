@@ -1,6 +1,6 @@
 import pygame.sprite
 from tiles import Tile, StaticTile, Coins, Crate, Plams
-from settings import tile_size, screen_height, screen_weight
+from settings import TILE_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 from player import Player
 from particles import ParticlesEffect
 from support import import_csv_layout, import_cut_graphics
@@ -71,9 +71,9 @@ class Level:
 
         # decoration
         self.sky = Sky(7)
-        level_width = len(terrain_layout[0]) * tile_size
-        self.water = Water(screen_height - 30, level_width)
-        self.clouds = Cloud(screen_height * 0.5, level_width, 40)
+        level_width = len(terrain_layout[0]) * TILE_SIZE
+        self.water = Water(SCREEN_HEIGHT - 30, level_width)
+        self.clouds = Cloud(SCREEN_HEIGHT * 0.5, level_width, 40)
 
         # dust particles
         self.dust_sprite = pygame.sprite.GroupSingle()
@@ -85,14 +85,14 @@ class Level:
     def player_setup(self, layout, change_health):
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
-                x = col_index * tile_size
-                y = row_index * tile_size
+                x = col_index * TILE_SIZE
+                y = row_index * TILE_SIZE
                 if val == '0':
                     player_sprite = Player((x, y), self.display_surface, self.create_jump_particles, change_health)
                     self.player.add(player_sprite)
                 if val == '1':
                     hat_surface = pygame.image.load('../graphics/character/hat.png').convert_alpha()
-                    goal_sprite = StaticTile(tile_size, hat_surface, x, y)
+                    goal_sprite = StaticTile(TILE_SIZE, hat_surface, x, y)
                     self.goal.add(goal_sprite)
 
     @staticmethod
@@ -103,42 +103,42 @@ class Level:
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val != '-1':
-                    x = col_index * tile_size
-                    y = row_index * tile_size
+                    x = col_index * TILE_SIZE
+                    y = row_index * TILE_SIZE
 
                     if type == 'terrain':
                         terrain_tile_list = import_cut_graphics('../graphics/terrain/terrain_tiles.png')
                         tile_surface = terrain_tile_list[int(val)]
-                        sprite = StaticTile(tile_size, tile_surface, x, y)
+                        sprite = StaticTile(TILE_SIZE, tile_surface, x, y)
 
                     if type == 'grass':
                         grass_tile_list = import_cut_graphics('../graphics/decoration/grass/grass.png')
                         tile_surface = grass_tile_list[int(val)]
-                        sprite = StaticTile(tile_size, tile_surface, x, y)
+                        sprite = StaticTile(TILE_SIZE, tile_surface, x, y)
 
                     if type == 'crates':
-                        sprite = Crate(tile_size, x, y)
+                        sprite = Crate(TILE_SIZE, x, y)
 
                     if type == 'coins':
                         if val == '0':
-                            sprite = Coins(tile_size, x, y, '../graphics/coins/gold', 3)
+                            sprite = Coins(TILE_SIZE, x, y, '../graphics/coins/gold', 3)
                         if val == '1':
-                            sprite = Coins(tile_size, x, y, '../graphics/coins/silver', 1)
+                            sprite = Coins(TILE_SIZE, x, y, '../graphics/coins/silver', 1)
 
                     if type == 'fg_palms':
                         if val == '4':
-                            sprite = Plams(tile_size, x, y, '../graphics/terrain/palm_large')
+                            sprite = Plams(TILE_SIZE, x, y, '../graphics/terrain/palm_large')
                         if val == '8':
-                            sprite = Plams(tile_size, x, y, '../graphics/terrain/palm_small')
+                            sprite = Plams(TILE_SIZE, x, y, '../graphics/terrain/palm_small')
 
                     if type == 'bg_palms':
-                        sprite = Plams(tile_size, x, y, '../graphics/terrain/palm_bg')
+                        sprite = Plams(TILE_SIZE, x, y, '../graphics/terrain/palm_bg')
 
                     if type == 'enemies':
-                        sprite = Enemy(tile_size, x, y)
+                        sprite = Enemy(TILE_SIZE, x, y)
 
                     if type == 'collision':
-                        sprite = Tile(tile_size, x, y)
+                        sprite = Tile(TILE_SIZE, x, y)
 
                     sprite_group.add(sprite)
 
@@ -179,10 +179,10 @@ class Level:
         player_x = player.rect.centerx
         direction_x = player.direction.x
 
-        if player_x < screen_weight / 4 and direction_x < 0:
+        if player_x < SCREEN_WIDTH / 4 and direction_x < 0:
             self.world_shift = 8
             player.speed = 0
-        elif player_x > screen_weight * 0.75 and direction_x > 0:
+        elif player_x > SCREEN_WIDTH * 0.75 and direction_x > 0:
             self.world_shift = -8
             player.speed = 0
         else:
@@ -238,7 +238,7 @@ class Level:
         #     player.on_ceiling = False
 
     def check_fall_map(self):
-        if self.player.sprite.rect.top > screen_height:
+        if self.player.sprite.rect.top > SCREEN_HEIGHT:
             self.player.sprite.change_health(-10)
             self.create_overworld(self.current_level, 0)
 

@@ -1,7 +1,7 @@
 import random
 
 import pygame
-from settings import vertical_title_number, tile_size, screen_weight
+from settings import VERTICAL_TITLE_NUMBER, TILE_SIZE, SCREEN_WIDTH
 from tiles import AnimationTile, StaticTile
 from support import import_folder
 
@@ -14,9 +14,9 @@ class Sky:
         self.horizon = horizon
 
         # stretch
-        self.top = pygame.transform.scale(self.top, (screen_weight, tile_size))
-        self.bottom = pygame.transform.scale(self.bottom, (screen_weight, tile_size))
-        self.middle = pygame.transform.scale(self.middle, (screen_weight, tile_size))
+        self.top = pygame.transform.scale(self.top, (SCREEN_WIDTH, TILE_SIZE))
+        self.bottom = pygame.transform.scale(self.bottom, (SCREEN_WIDTH, TILE_SIZE))
+        self.middle = pygame.transform.scale(self.middle, (SCREEN_WIDTH, TILE_SIZE))
 
         # style
         self.style = style
@@ -25,8 +25,8 @@ class Sky:
             self.palms = []
 
             for surface in [random.choice(palms_surf) for _ in range(20)]:
-                x = random.randint(0, screen_weight)
-                y = (self.horizon * tile_size) + random.randint(50, 100)
+                x = random.randint(0, SCREEN_WIDTH)
+                y = (self.horizon * TILE_SIZE) + random.randint(50, 100)
                 rect = surface.get_rect(midbottom=(x, y))
                 self.palms.append((surface, rect))
 
@@ -34,14 +34,14 @@ class Sky:
             self.clouds = []
 
             for surface in [random.choice(clouds_surf) for _ in range(8)]:
-                x = random.randint(0, screen_weight)
-                y = random.randint(100, self.horizon * tile_size - 100)
+                x = random.randint(0, SCREEN_WIDTH)
+                y = random.randint(100, self.horizon * TILE_SIZE - 100)
                 rect = surface.get_rect(midbottom=(x, y))
                 self.clouds.append((surface, rect))
 
     def draw(self, surface):
-        for row in range(vertical_title_number):
-            y = row * tile_size
+        for row in range(VERTICAL_TITLE_NUMBER):
+            y = row * TILE_SIZE
             if row < self.horizon:
                 surface.blit(self.top, (0, y))
             if row == self.horizon:
@@ -58,9 +58,9 @@ class Sky:
 
 class Water:
     def __init__(self, top, level_width):
-        water_start = -screen_weight / 2
+        water_start = -SCREEN_WIDTH / 2
         water_tile_width = 192  # 水的宽度
-        tile_x_amount = int((level_width + screen_weight) / water_tile_width)
+        tile_x_amount = int((level_width + SCREEN_WIDTH) / water_tile_width)
         self.water_sprites = pygame.sprite.Group()
 
         for tile in range(tile_x_amount):
@@ -77,8 +77,8 @@ class Water:
 class Cloud:
     def __init__(self, horizon, level_width, cloud_number):
         cloud_surf_list = import_folder('../graphics/decoration/clouds')
-        min_x = -screen_weight / 2
-        max_x = level_width + screen_weight / 2
+        min_x = -SCREEN_WIDTH / 2
+        max_x = level_width + SCREEN_WIDTH / 2
         min_y = 0
         max_y = horizon
         self.cloud_sprite = pygame.sprite.Group()

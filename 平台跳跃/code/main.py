@@ -1,6 +1,6 @@
 import pygame
 import sys
-from settings import screen_height, screen_weight
+from settings import SCREEN_HEIGHT, SCREEN_WIDTH
 from level import Level
 from overworld import Overworld
 from ui import UI
@@ -78,7 +78,7 @@ class Game:
 
 pygame.init()
 pygame.mixer.init()
-screen = pygame.display.set_mode((screen_weight, screen_height))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 game = Game()
 

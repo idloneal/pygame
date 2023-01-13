@@ -1,7 +1,7 @@
 import pygame
 from os import listdir
 from csv import reader
-from settings import tile_size
+from settings import TILE_SIZE
 
 
 def import_folder(path):
@@ -9,8 +9,8 @@ def import_folder(path):
 
     for image in listdir(path):
         full_path = path + '/' + image
-        image_full = pygame.image.load(full_path).convert_alpha()
-        surface_list.append(image_full)
+        full_image = pygame.image.load(full_path).convert_alpha()
+        surface_list.append(full_image)
 
     return surface_list
 
@@ -26,15 +26,15 @@ def import_csv_layout(path):
 
 def import_cut_graphics(path):
     surface = pygame.image.load(path).convert_alpha()
-    tile_num_x = int(surface.get_size()[0] / tile_size)
-    tile_num_y = int(surface.get_size()[1] / tile_size)
+    tile_num_x = int(surface.get_size()[0] / TILE_SIZE)
+    tile_num_y = int(surface.get_size()[1] / TILE_SIZE)
 
     cut_tiles = []
     for row in range(tile_num_y):
         for col in range(tile_num_x):
-            x = col * tile_size
-            y = row * tile_size
-            new_surf = pygame.Surface((tile_size, tile_size), flags=pygame.SRCALPHA)
-            new_surf.blit(surface, (0, 0), pygame.Rect(x, y, tile_size, tile_size))  # 切割图片
+            x = col * TILE_SIZE
+            y = row * TILE_SIZE
+            new_surf = pygame.Surface((TILE_SIZE, TILE_SIZE), flags=pygame.SRCALPHA)
+            new_surf.blit(surface, (0, 0), pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))  # 切割图片
             cut_tiles.append(new_surf)
     return cut_tiles
