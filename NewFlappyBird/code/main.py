@@ -45,7 +45,7 @@ class Game:
 
         # audio
         self.bg_sound = pygame.mixer.Sound('../sounds/music.wav')
-        self.bg_sound.set_volume(0.3)
+        self.bg_sound.set_volume(0.1)
         self.bg_sound.play(-1)
 
     def collisions(self):
