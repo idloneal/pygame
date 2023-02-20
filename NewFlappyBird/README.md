@@ -6,8 +6,13 @@
 
 ## 成果展示
 **开始画面**
+
 ![img.png](img.png)
+
 **失败判定**
+
 ![img_1.png](img_1.png)
+
 **结束界面**
+
 ![img_2.png](img_2.png)
